@@ -1,0 +1,3016 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-bs-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>الاختبارات الذكية للبنوك (دورة أغسطس 2025)</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.rtl.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+    />
+    <style>
+      .passage {
+        font-weight: bold;
+        background-color: var(--bs-dark);
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        border-right: 4px solid var(--bs-primary);
+      }
+
+      .timer {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1000;
+        font-size: 1.2rem;
+        font-weight: bold;
+      }
+
+      .question-card {
+        min-height: 200px;
+      }
+
+      .choice-btn {
+        text-align: right;
+        padding: 10px 15px;
+        margin: 5px 0;
+      }
+
+      .correct {
+        background-color: #198754 !important;
+        border-color: #198754 !important;
+      }
+
+      .incorrect {
+        background-color: #dc3545 !important;
+        border-color: #dc3545 !important;
+      }
+
+      .score-display {
+        font-size: 1.5rem;
+        font-weight: bold;
+      }
+
+      .category-section {
+        border: 2px solid var(--bs-border-color);
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+      }
+
+      .exam-group {
+        margin-bottom: 15px;
+      }
+
+      .quiz-controls {
+        position: sticky;
+        bottom: 20px;
+        background: var(--bs-dark);
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        z-index: 100;
+      }
+
+      @media print {
+        .no-print {
+          display: none !important;
+        }
+
+        body {
+          /* background: white !important; */
+        }
+
+        * {
+          color: white !important;
+        }
+      }
+
+      #themeToggle {
+        margin: 20px calc(50% - 58px) 0;
+        width: 116px;
+        z-index: 1000;
+      }
+
+      .print-btn {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.25);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div
+      id="loadingPlaceholder"
+      style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bs-dark);
+        color: var(--bs-primary-text);
+      "
+    >
+      <div class="text-center">
+        <div
+          class="spinner-border text-primary"
+          style="width: 4rem; height: 4rem"
+          role="status"
+        >
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <div
+          style="
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: var(--bs-primary-text);
+          "
+        >
+          جاري التحميل...
+        </div>
+      </div>
+    </div>
+
+    <div class="container mt-4">
+      <!-- Setup Screen -->
+      <div id="setupScreen">
+        <h1 class="text-center mb-4 no-print">إعداد الاختبار</h1>
+
+        <ul class="nav nav-tabs mb-4 no-print" id="myTab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link active"
+              id="home-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#home-tab-pane"
+              type="button"
+              role="tab"
+              aria-controls="home-tab-pane"
+              aria-selected="true"
+            >
+              اختبار اعتيادي جديد
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link"
+              id="random-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#random-tab-pane"
+              type="button"
+              role="tab"
+              aria-controls="random-tab-pane"
+            >
+              اختبار تدريب جديد
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link"
+              id="nav-exams-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#nav-exams"
+              type="button"
+              role="tab"
+              aria-controls="nav-exams"
+              aria-selected="false"
+              onclick="showExamsHistory()"
+            >
+              سجل الاختبارات السابقة
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link"
+              id="nav-box-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#nav-box"
+              type="button"
+              role="tab"
+              aria-controls="nav-box"
+              aria-selected="false"
+            >
+              صندوق المراجعة
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link"
+              id="nav-settings-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#nav-settings"
+              type="button"
+              role="tab"
+              aria-controls="nav-settings"
+              aria-selected="false"
+            >
+              الإعدادات
+            </button>
+          </li>
+        </ul>
+        <div class="tab-content" id="myTabContent">
+          <div
+            class="tab-pane fade show active"
+            id="home-tab-pane"
+            role="tabpanel"
+            aria-labelledby="home-tab"
+            tabindex="0"
+          >
+            <div class="text-center mb-4">
+              <button
+                class="btn btn-sm btn-outline-primary"
+                id="loadSampleData"
+                style="display: none"
+              >
+                تحميل البيانات التجريبية
+              </button>
+            </div>
+
+            <!-- Categories Selection -->
+            <div id="categoriesSection" style="display: none">
+              <div class="card mb-4">
+                <div class="card-body">
+                  <h5 class="card-title">اختيار الأقسام</h5>
+                  <button
+                    class="btn btn-outline-primary me-2 mb-2"
+                    id="selectAllCategories"
+                  >
+                    اختيار جميع الأقسام
+                  </button>
+                  <div id="categoriesList"></div>
+                </div>
+              </div>
+
+              <!-- Exams Selection -->
+              <div class="card mb-4">
+                <div class="card-body">
+                  <h5 class="card-title">اختيار الاختبارات</h5>
+                  <button
+                    class="btn btn-outline-primary me-2 mb-2"
+                    id="selectAllExams"
+                  >
+                    اختيار جميع الاختبارات</button
+                  ><button
+                    class="btn btn-outline-primary me-2 mb-2 btn-sm"
+                    onclick="selectAllExamsWithFilter('التناظر')"
+                  >
+                    التناظر اللفظي</button
+                  ><button
+                    class="btn btn-outline-primary me-2 mb-2 btn-sm"
+                    onclick="selectAllExamsWithFilter('إكمال')"
+                  >
+                    إكمال الجمل</button
+                  ><button
+                    class="btn btn-outline-primary me-2 mb-2 btn-sm"
+                    onclick="selectAllExamsWithFilter('السياقي')"
+                  >
+                    الخطأ السياقي</button
+                  ><button
+                    class="btn btn-outline-primary me-2 mb-2 btn-sm"
+                    onclick="selectAllExamsWithFilter('المقروء')"
+                  >
+                    استيعاب المقروء</button
+                  ><button
+                    class="btn btn-outline-primary me-2 mb-2 btn-sm"
+                    id="selectAllExams"
+                    onclick="selectAllExamsWithFilter('الشاذة')"
+                  >
+                    المفردة الشاذة
+                  </button>
+                  <div id="examsList"></div>
+                </div>
+              </div>
+
+              <!-- Options -->
+              <div class="card mb-4">
+                <div class="card-body">
+                  <h5 class="card-title">خيارات الاختبار</h5>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <p class="mb-2">
+                        عدد الأسئلة:
+                        <span id="totalQuestions" class="fw-bold">0</span>
+                      </p>
+
+                      <div class="form-check mb-3">
+                        <input
+                          class="form-check-input"
+                          type="checkbox"
+                          id="enableTimer"
+                        />
+                        <label class="form-check-label" for="enableTimer"
+                          >تحديد وقت للاختبار</label
+                        >
+                      </div>
+
+                      <div id="timerInput" style="display: none" class="mb-3">
+                        <label for="timeMinutes" class="form-label"
+                          >عدد الدقائق:</label
+                        >
+                        <input
+                          type="number"
+                          class="form-control"
+                          id="timeMinutes"
+                          min="1"
+                          value="30"
+                        />
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-check mb-3">
+                        <input
+                          class="form-check-input"
+                          type="checkbox"
+                          id="shuffleQuestions"
+                        />
+                        <label class="form-check-label" for="shuffleQuestions"
+                          >ترتيب الأسئلة عشوائياً</label
+                        >
+                      </div>
+
+                      <div class="form-check mb-3">
+                        <input
+                          class="form-check-input"
+                          type="checkbox"
+                          id="shuffleChoices"
+                        />
+                        <label class="form-check-label" for="shuffleChoices"
+                          >ترتيب الخيارات عشوائياً</label
+                        >
+                      </div>
+                    </div>
+                  </div>
+
+                  <button class="btn btn-success btn-lg w-100" id="startQuiz">
+                    بدء الاختبار
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="tab-pane fade"
+            id="random-tab-pane"
+            role="tabpanel"
+            aria-labelledby="random-tab"
+            tabindex="0"
+          >
+            <div class="card mb-4">
+              <div class="card-body">
+                <h5 class="card-title">خيارات الاختبار</h5>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div id="totalQuestionsInput" class="mb-3">
+                      <label for="totalQuestionsInputs" class="form-label"
+                        >عدد الأسئلة:</label
+                      >
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="totalQuestionsInputs"
+                        min="1"
+                        max="6850"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-check mb-3">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        id="shuffleChoicesInput"
+                      />
+                      <label class="form-check-label" for="shuffleChoicesInput"
+                        >ترتيب الخيارات عشوائياً</label
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  class="btn btn-success btn-lg w-100"
+                  onclick="startRandomQuiz(-1)"
+                >
+                  بدء الاختبار
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="tab-pane fade"
+            id="nav-exams"
+            role="tabpanel"
+            aria-labelledby="nav-exams-tab"
+            tabindex="0"
+          ></div>
+          <div
+            class="tab-pane fade"
+            id="nav-box"
+            role="tabpanel"
+            aria-labelledby="nav-box-tab"
+            tabindex="0"
+          >
+            <div id="reviewBoxContainer"></div>
+          </div>
+          <div
+            class="tab-pane fade"
+            id="nav-settings"
+            role="tabpanel"
+            aria-labelledby="nav-settings-tab"
+            tabindex="0"
+          >
+            <!-- بيانات المستخدم -->
+            <div class="card mb-3" id="userInfoCard" style="display: none">
+              <div class="card-body bg-info bg-opacity-10">
+                <h5 class="card-title">
+                  مرحبًا <span id="userNameDisplay">(اسم)</span>!
+                </h5>
+                <div class="mb-3">
+                  <p>
+                    معرفك هو <span id="userIdDisplay">(معرف)</span>، احفظه في
+                    مكان آمن ولا تقم بنشره لأنه وسيلتك الوحيدة لتسجيل الدخول.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="alert alert-primary" role="alert" id="syncInfoAlert">
+              استخدامك لحساب في الموقع يمكنك من مزامنة تقدمك بين الأجهزة.
+            </div>
+            <!-- تسجيل الدخول -->
+            <div class="card mb-3" id="loginCard">
+              <div class="card-body">
+                <div class="mb-3">
+                  <label for="loginInput" class="form-label">تسجيل دخول</label>
+                  <div class="input-group">
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="loginInput"
+                      placeholder="أدخل معرف المستخدم"
+                    />
+                    <button class="btn btn-primary" id="loginBtn">دخول</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- إنشاء حساب -->
+            <div class="card mb-3" id="registerCard">
+              <div class="card-body">
+                <div class="mb-3">
+                  <label for="registerInput" class="form-label"
+                    >إنشاء حساب</label
+                  >
+                  <div class="input-group">
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="registerInput"
+                      placeholder="أدخل اسمك"
+                    />
+                    <button class="btn btn-success" id="registerBtn">
+                      إنشاء
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- أزرار التحكم -->
+            <div class="card mb-3" id="userActionsCard" style="display: none">
+              <div class="card-body">
+                <button class="btn btn-danger me-2" id="deleteAccountBtn">
+                  حذف الحساب
+                </button>
+                <button class="btn btn-secondary me-2" id="logoutBtn">
+                  تسجيل الخروج
+                </button>
+              </div>
+            </div>
+            <!-- أزرار حذف سجل الاختبارات (دائمًا تظهر) -->
+            <div class="card mb-3" id="deleteExamsCard">
+              <div class="card-body">
+                <div class="form-check form-switch mb-3">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    role="switch"
+                    id="printButtonActivate"
+                    onchange="printButtonActivateEdit()"
+                    checked
+                  />
+                  <label class="form-check-label" for="printButtonActivate"
+                    >تفعيل زر الطباعة</label
+                  >
+                </div>
+                <button class="btn btn-danger me-2" id="deleteAllExamsBtn">
+                  حذف سجل الاختبارات بالكامل
+                </button>
+                <button class="btn btn-danger me-2" id="deleteReviewBoxBtn">
+                  حذف صندوق المراجعة بالكامل
+                </button>
+                <label class="btn btn-danger me-2">
+                  تشغيل اختبار من ملف JSON
+                  <input
+                    type="file"
+                    id="loadExamFileInput"
+                    accept=".json,.txt"
+                    hidden
+                  />
+                </label>
+              </div>
+            </div>
+            <!-- تحذير تعارض البيانات -->
+            <div
+              class="alert alert-warning mt-3"
+              id="dataConflictAlert"
+              style="display: none"
+            >
+              <div>هناك اختلاف بين بيانات الجهاز وبيانات السحابة. يمكنك:</div>
+              <div class="mt-2">
+                <button
+                  class="btn btn-outline-primary me-2"
+                  id="uploadLocalToCloudBtn"
+                >
+                  رفع بيانات الجهاز إلى السحابة
+                </button>
+                <button
+                  class="btn btn-outline-success"
+                  id="downloadCloudToLocalBtn"
+                >
+                  تحميل بيانات السحابة للجهاز
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quiz Screen -->
+      <div id="quizScreen" style="display: none">
+        <div
+          id="timer"
+          class="timer badge bg-danger"
+          style="display: none"
+        ></div>
+
+        <div class="row">
+          <div class="col-md-8 mx-auto">
+            <div class="card question-card">
+              <div class="card-body">
+                <div
+                  class="d-flex justify-content-between align-items-center mb-3"
+                >
+                  <span class="badge bg-primary"
+                    >السؤال <span id="currentQuestionNum">1</span> من
+                    <span id="totalQuestionsNum">1</span></span
+                  >
+                  <span class="score-display text-primary"
+                    >النتيجة: <span id="currentScore">0</span></span
+                  >
+                </div>
+
+                <div
+                  id="passageText"
+                  class="passage"
+                  style="display: none"
+                ></div>
+                <h4 id="questionText" class="mb-4"></h4>
+                <div id="choicesContainer"></div>
+
+                <div class="d-flex justify-content-between mt-4">
+                  <div class="dropdown">
+                    <button
+                      class="btn btn-secondary dropdown-toggle"
+                      type="button"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                    >
+                      خيارات
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-dark">
+                      <li>
+                        <a class="dropdown-item" href="#" id="reviewButton"
+                          >صندوق المراجعة</a
+                        >
+                      </li>
+                      <li>
+                        <a class="dropdown-item" href="#" id="saveAndReturn"
+                          >حفظ والعودة للرئيسية</a
+                        >
+                      </li>
+                      <li>
+                        <a class="dropdown-item" href="#" id="cancelAndReturn">
+                          إلغاء الاختبار</a
+                        >
+                      </li>
+                    </ul>
+                  </div>
+
+                  <button class="btn btn-primary" id="nextQuestion" disabled>
+                    السؤال التالي
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results Screen -->
+      <div id="resultsScreen" style="display: none">
+        <div class="text-center mb-4">
+          <h1 class="mb-3">انتهى الاختبار!</h1>
+          <div class="row">
+            <div class="col-md-3 col-6">
+              <div class="card text-center">
+                <div class="card-body">
+                  <h5 class="card-title">النتيجة النهائية</h5>
+                  <h2 class="text-primary" id="finalScore">0/0</h2>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3 col-6">
+              <div class="card text-center">
+                <div class="card-body">
+                  <h5 class="card-title">النسبة المئوية</h5>
+                  <h2 class="text-success" id="percentage">0%</h2>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3 col-6">
+              <div class="card text-center">
+                <div class="card-body">
+                  <h5 class="card-title">الإجابات الصحيحة</h5>
+                  <h2 class="text-success" id="correctAnswers">0</h2>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3 col-6">
+              <div class="card text-center">
+                <div class="card-body">
+                  <h5 class="card-title">الإجابات الخاطئة</h5>
+                  <h2 class="text-danger" id="wrongAnswers">0</h2>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-center mb-4">
+          <button class="btn btn-primary me-2" id="reviewAll">
+            مراجعة جميع الأسئلة
+          </button>
+          <button class="btn btn-warning me-2" id="reviewWrong">
+            مراجعة الأسئلة الخاطئة
+          </button>
+          <button class="btn btn-secondary me-2" id="newQuiz">
+            العودة للرئيسية
+          </button>
+        </div>
+      </div>
+
+      <!-- Review Screen -->
+      <div id="reviewScreen" style="display: none">
+        <div
+          class="d-flex justify-content-between align-items-center mb-4 no-print"
+        >
+          <h2 id="reviewTitle">مراجعة الأسئلة</h2>
+          <div class="dropdown">
+            <button
+              class="btn btn-secondary dropdown-toggle"
+              type="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              خيارات
+            </button>
+            <ul class="dropdown-menu dropdown-menu-dark">
+              <li>
+                <a class="dropdown-item" href="#" id="backToResults"
+                  >العودة للنتائج</a
+                >
+              </li>
+              <li>
+                <a class="dropdown-item" href="#" onclick="window.print()"
+                  >طباعة</a
+                >
+              </li>
+              <li>
+                <a
+                  class="dropdown-item"
+                  href="#"
+                  onclick="addAllReviewToReviewBox()"
+                  id="addAllToReviewBoxDropdownItem"
+                  >صندوق المراجعة</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div id="reviewContent"></div>
+      </div>
+    </div>
+
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
+      <div
+        id="smartToast"
+        class="toast align-items-center border-0"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div class="d-flex">
+          <div class="toast-body text-white" id="smartToastBody">تم الحذف</div>
+          <button
+            type="button"
+            class="btn-close btn-close-white me-2 m-auto"
+            data-bs-dismiss="toast"
+            aria-label="Close"
+          ></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap Modal for Delete Confirmation -->
+    <div
+      class="modal fade"
+      id="deleteConfirmModal"
+      tabindex="-1"
+      aria-labelledby="deleteConfirmModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deleteConfirmModalLabel">
+              تأكيد الحذف
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="إغلاق"
+            ></button>
+          </div>
+          <div class="modal-body" id="deleteConfirmModalBody">
+            هل أنت متأكد أنك تريد حذف هذا الاختبار؟ لا يمكن التراجع عن هذا
+            الإجراء.
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              إلغاء
+            </button>
+            <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+              تأكيد الحذف
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-secondary btn-sm print-btn no-print"
+      onclick="window.print()"
+      id="printButton"
+    >
+      <i class="bi bi-printer-fill"></i>
+    </button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="questions.js"></script>
+    <script>
+      let questionsData = [];
+      let selectedQuestions = [];
+      let currentQuestionIndex = 0;
+      let userAnswers = [];
+      let score = 0;
+      let timerInterval;
+      let selectedCategories = new Set();
+      let selectedExams = new Set();
+      let createdAt = null;
+
+      function showSmartToast(message, type = "success") {
+        const toastElement = document.getElementById("smartToast");
+        const toastBody = document.getElementById("smartToastBody");
+
+        toastElement.classList.remove(
+          "bg-success",
+          "bg-danger",
+          "bg-warning",
+          "bg-info"
+        );
+
+        switch (type) {
+          case "success":
+            toastElement.classList.add("bg-success");
+            break;
+          case "error":
+            toastElement.classList.add("bg-danger");
+            break;
+          case "warning":
+            toastElement.classList.add("bg-warning");
+            break;
+          case "info":
+            toastElement.classList.add("bg-info");
+            break;
+        }
+
+        toastBody.textContent = message;
+
+        const toast = new bootstrap.Toast(toastElement);
+        toast.show();
+      }
+
+      document.getElementById("loadSampleData").onclick = function () {
+        questionsData = sampleData.filter(
+          q =>
+            !q.question.includes("اسم الطالب") &&
+            !q.question.includes("كلمة المرور") &&
+            q.choices &&
+            q.choices.length > 0
+        );
+        setupCategories();
+        document.getElementById("categoriesSection").style.display = "block";
+
+        const loadingDiv = document.getElementById("loadingPlaceholder");
+        if (loadingDiv) loadingDiv.style.display = "none";
+      };
+
+      function printButtonActivateEdit() {
+        let printButtonActivatelocalStorage = localStorage.getItem(
+          "printButtonActivate"
+        );
+        if (printButtonActivatelocalStorage == "false") {
+          localStorage.setItem("printButtonActivate", true);
+          printButton.style.display = "block";
+        } else {
+          localStorage.setItem("printButtonActivate", false);
+          printButton.style.display = "none ";
+        }
+      }
+
+      window.onload = async function () {
+        let printButtonActivatelocalStorage = localStorage.getItem(
+          "printButtonActivate"
+        );
+        const printButtonActivate = document.getElementById(
+          "printButtonActivate"
+        );
+        const printButton = document.getElementById("printButton");
+
+        if (printButtonActivatelocalStorage == "false") {
+          printButton.style.display = "none";
+          printButtonActivate.checked = false;
+        }
+
+        document.getElementById("loadSampleData").click();
+        window.addEventListener("online", () => {
+          syncAllLocalExamsToCloud();
+          updateLocalExamsFromCloud();
+          syncReviewBoxToCloud();
+        });
+        if ((await checkOnline()) && currentUserId) {
+          syncAllLocalExamsToCloud();
+          updateLocalExamsFromCloud();
+          syncReviewBoxToCloud();
+        }
+      };
+
+      async function updateSelectedQuestions(js_id, selectedQuestions) {
+        console.log(
+          "Updating selectedQuestions for exam:",
+          js_id,
+          selectedQuestions
+        );
+        try {
+          const response = await fetch("cloud_sync.php", {
+            method: "POST",
+            body: new URLSearchParams({
+              action: "update_selected_questions",
+              js_id,
+              selectedQuestions: JSON.stringify(selectedQuestions),
+            }),
+          });
+
+          const result = await response.json();
+
+          if (!result.success) {
+            console.error(
+              "Failed to update selectedQuestions:",
+              result.error || result
+            );
+            return false;
+          }
+
+          return true;
+        } catch (error) {
+          console.error(
+            "Network or parsing error while updating selectedQuestions:",
+            error
+          );
+          return false;
+        }
+      }
+
+      async function migrateAllExams() {
+        const codes = JSON.parse(
+          localStorage.getItem("previousExams25") || "[]"
+        );
+
+        for (const js_id of codes) {
+          const examState = await idbGet("exams", js_id);
+
+          if (examState && migrateOldData(examState)) {
+            await idbSet("exams", js_id, examState);
+            const success = await updateSelectedQuestions(
+              js_id,
+              examState.selectedQuestions
+            );
+
+            if (!success) {
+              console.warn("Failed to sync selectedQuestions for exam:", js_id);
+            }
+          }
+        }
+      }
+
+      function setupCategories() {
+        const categories = [...new Set(questionsData.map(q => q.category))];
+        const categoriesList = document.getElementById("categoriesList");
+        categoriesList.innerHTML = "";
+
+        categories.forEach(category => {
+          const btn = document.createElement("button");
+          btn.className = "btn btn-outline-secondary me-2 mb-2";
+          btn.textContent = category;
+          btn.onclick = () => toggleCategory(category, btn);
+          categoriesList.appendChild(btn);
+        });
+      }
+
+      function toggleCategory(category, btn) {
+        if (selectedCategories.has(category)) {
+          selectedCategories.delete(category);
+          btn.className = "btn btn-outline-secondary me-2 mb-2";
+        } else {
+          selectedCategories.add(category);
+          btn.className = "btn btn-secondary me-2 mb-2";
+        }
+        updateExamsList();
+        updateQuestionCount();
+      }
+
+      function updateExamsList() {
+        const examsList = document.getElementById("examsList");
+        examsList.innerHTML = "";
+
+        if (selectedCategories.size === 0) return;
+
+        const categorizedExams = {};
+        questionsData.forEach(q => {
+          if (selectedCategories.has(q.category)) {
+            if (!categorizedExams[q.category]) {
+              categorizedExams[q.category] = new Set();
+            }
+            categorizedExams[q.category].add(q.exam);
+          }
+        });
+
+        Object.keys(categorizedExams).forEach(category => {
+          const categoryDiv = document.createElement("div");
+          categoryDiv.className = "category-section";
+
+          const categoryTitle = document.createElement("h6");
+          categoryTitle.textContent = category;
+          categoryTitle.className = "text-primary mb-3";
+          categoryDiv.appendChild(categoryTitle);
+
+          const examGroup = document.createElement("div");
+          examGroup.className = "exam-group";
+
+          [...categorizedExams[category]].forEach(exam => {
+            const btn = document.createElement("button");
+            btn.className = "btn btn-outline-secondary me-2 mb-2";
+            btn.textContent = exam;
+            btn.onclick = () => toggleExam(exam, btn);
+            examGroup.appendChild(btn);
+          });
+
+          categoryDiv.appendChild(examGroup);
+          examsList.appendChild(categoryDiv);
+        });
+      }
+
+      function toggleExam(exam, btn) {
+        if (selectedExams.has(exam)) {
+          selectedExams.delete(exam);
+          btn.className = "btn btn-outline-secondary me-2 mb-2";
+        } else {
+          selectedExams.add(exam);
+          btn.className = "btn btn-secondary me-2 mb-2";
+        }
+        updateQuestionCount();
+      }
+
+      function updateQuestionCount() {
+        let count = 0;
+        if (selectedCategories.size > 0 && selectedExams.size > 0) {
+          count = questionsData.filter(
+            q => selectedCategories.has(q.category) && selectedExams.has(q.exam)
+          ).length;
+        }
+        document.getElementById("totalQuestions").textContent = count;
+      }
+
+      document.getElementById("selectAllCategories").onclick = function () {
+        const buttons = document.querySelectorAll("#categoriesList button");
+        const allSelected = [...buttons].every(btn =>
+          btn.className.includes("btn-secondary")
+        );
+
+        buttons.forEach(btn => {
+          const category = btn.textContent;
+          if (allSelected) {
+            selectedCategories.delete(category);
+            btn.className = "btn btn-outline-secondary me-2 mb-2";
+          } else {
+            selectedCategories.add(category);
+            btn.className = "btn btn-secondary me-2 mb-2";
+          }
+        });
+        updateExamsList();
+        updateQuestionCount();
+      };
+
+      document.getElementById("selectAllExams").onclick = function () {
+        const buttons = document.querySelectorAll("#examsList button");
+        const allSelected = [...buttons].every(btn =>
+          btn.className.includes("btn-secondary")
+        );
+
+        buttons.forEach(btn => {
+          const exam = btn.textContent;
+          if (allSelected) {
+            selectedExams.delete(exam);
+            btn.className = "btn btn-outline-secondary me-2 mb-2";
+          } else {
+            selectedExams.add(exam);
+            btn.className = "btn btn-secondary me-2 mb-2";
+          }
+        });
+        updateQuestionCount();
+      };
+
+      function selectAllExamsWithFilter(word) {
+        const buttons = document.querySelectorAll("#examsList button");
+
+        const filtered = [...buttons].filter(btn =>
+          btn.textContent.includes(word)
+        );
+
+        const allSelected = filtered.every(btn =>
+          btn.className.includes("btn-secondary")
+        );
+
+        filtered.forEach(btn => {
+          const exam = btn.textContent;
+          if (allSelected) {
+            selectedExams.delete(exam);
+            btn.className = "btn btn-outline-secondary me-2 mb-2";
+          } else {
+            selectedExams.add(exam);
+            btn.className = "btn btn-secondary me-2 mb-2";
+          }
+        });
+        updateQuestionCount();
+      }
+
+      document.getElementById("enableTimer").onchange = function () {
+        document.getElementById("timerInput").style.display = this.checked
+          ? "block"
+          : "none";
+      };
+
+      function generateUniqueCode(length = 24) {
+        const charset =
+          "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+        let result = "";
+        for (let i = 0; i < length; i++) {
+          result += charset[Math.floor(Math.random() * charset.length)];
+        }
+        return result;
+      }
+
+      document.getElementById("startQuiz").onclick = async function () {
+        if (selectedCategories.size === 0 || selectedExams.size === 0) {
+          showSmartToast("يرجى اختيار قسم واختبار واحد على الأقل", "warning");
+          return;
+        }
+
+        selectedQuestions = questionsData.filter(
+          q => selectedCategories.has(q.category) && selectedExams.has(q.exam)
+        );
+
+        if (selectedQuestions.length === 0) {
+          showSmartToast("لا توجد أسئلة متاحة للاختيارات المحددة", "warning");
+          return;
+        }
+
+        if (document.getElementById("shuffleQuestions").checked) {
+          selectedQuestions = shuffleQuestionsSmart(selectedQuestions);
+        }
+
+        if (document.getElementById("shuffleChoices").checked) {
+          selectedQuestions.forEach(q => {
+            if (q.choices) {
+              q.choices = shuffleArray([...q.choices]);
+            }
+          });
+        }
+
+        userAnswers = new Array(selectedQuestions.length).fill(null);
+        currentQuestionIndex = 0;
+        score = 0;
+
+        document.getElementById("setupScreen").style.display = "none";
+        document.getElementById("quizScreen").style.display = "block";
+        document.getElementById("totalQuestionsNum").textContent =
+          selectedQuestions.length;
+
+        if (document.getElementById("enableTimer").checked) {
+          startTimer();
+        }
+
+        showQuestion();
+
+        const uniqueCode = generateUniqueCode();
+        window.currentExamCode = uniqueCode;
+
+        createdAt = new Date().toISOString();
+
+        const examState = {
+          selectedQuestions: selectedQuestions.map(q =>
+            questionsData.findIndex(
+              item =>
+                item.category === q.category &&
+                item.exam === q.exam &&
+                item.question_number === q.question_number
+            )
+          ),
+          currentQuestionIndex: 0,
+          userAnswers: new Array(selectedQuestions.length).fill(null),
+          score: 0,
+          selectedCategories: Array.from(selectedCategories),
+          selectedExams: Array.from(selectedExams),
+          isDone: false,
+          questionsCount: selectedQuestions.length,
+          createdAt: createdAt,
+        };
+
+        await idbSet("exams", uniqueCode, examState);
+
+        const previousCodes = JSON.parse(
+          localStorage.getItem("previousExams25") || "[]"
+        );
+        previousCodes.push(uniqueCode);
+        localStorage.setItem("previousExams25", JSON.stringify(previousCodes));
+
+        if ((await checkOnline()) && currentUserId) {
+          syncNewExamToCloud(examState, uniqueCode);
+        }
+      };
+
+      function shuffleArray(array) {
+        const shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+      }
+
+      function startTimer() {
+        const minutes = parseInt(document.getElementById("timeMinutes").value);
+        let timeLeft = minutes * 60;
+        document.getElementById("timer").style.display = "block";
+
+        timerInterval = setInterval(() => {
+          const mins = Math.floor(timeLeft / 60);
+          const secs = timeLeft % 60;
+          document.getElementById("timer").textContent = `${mins
+            .toString()
+            .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+
+          if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            finishQuiz();
+          }
+          timeLeft--;
+        }, 1000);
+      }
+
+      async function showQuestion() {
+        await updateExamState("nextQuestion");
+        if (
+          selectedQuestions.length > 0 &&
+          typeof selectedQuestions[0] === "object"
+        ) {
+          selectedQuestions = selectedQuestions.map(q =>
+            questionsData.findIndex(
+              item =>
+                item.category === q.category &&
+                item.exam === q.exam &&
+                item.question_number === q.question_number
+            )
+          );
+        }
+        const questionIndex = selectedQuestions[currentQuestionIndex];
+        const question = questionsData[questionIndex];
+
+        question.choices = removeDuplicates(question.choices);
+
+        const questionAddress = `${question.category}.${question.exam}.${question.question_number}`;
+        const isInReviewBox = await isQuestionInReviewBox(questionAddress);
+
+        document.getElementById("currentQuestionNum").textContent =
+          currentQuestionIndex + 1;
+        document.getElementById("currentScore").textContent = score;
+
+        if (question.passage) {
+          document.getElementById("passageText").innerHTML =
+            question.passage.replace(/\n/g, "<br>");
+          document.getElementById("passageText").style.display = "block";
+        } else {
+          document.getElementById("passageText").style.display = "none";
+        }
+
+        document.getElementById("questionText").textContent = question.question;
+
+        const choicesContainer = document.getElementById("choicesContainer");
+        choicesContainer.innerHTML = "";
+
+        question.choices.forEach((choice, index) => {
+          const btn = document.createElement("button");
+          btn.className = "btn btn-outline-light choice-btn w-100";
+          btn.textContent = choice;
+          btn.onclick = () => selectAnswer(choice, btn);
+          choicesContainer.appendChild(btn);
+        });
+
+        const reviewButton = document.getElementById("reviewButton");
+        const updateReviewButton = async () => {
+          const isInReviewBoxNow = await isQuestionInReviewBox(questionAddress);
+
+          reviewButton.textContent = isInReviewBoxNow
+            ? "حذف من صندوق المراجعة"
+            : "إضافة إلى صندوق المراجعة";
+        };
+        updateReviewButton();
+
+        reviewButton.onclick = async () => {
+          const isInReviewBoxNow = await isQuestionInReviewBox(questionAddress);
+          if (isInReviewBoxNow) {
+            manageReviewBox("delete", questionAddress);
+          } else {
+            manageReviewBox("add", questionAddress);
+          }
+          updateReviewButton();
+        };
+
+        document.getElementById("nextQuestion").disabled = true;
+
+        if (userAnswers[currentQuestionIndex] !== null) {
+          document.getElementById("nextQuestion").disabled = false;
+          const buttons = choicesContainer.querySelectorAll("button");
+          buttons.forEach(btn => {
+            if (
+              btn.textContent === userAnswers[currentQuestionIndex].selected
+            ) {
+              if (userAnswers[currentQuestionIndex].correct) {
+                btn.className = "btn choice-btn w-100 correct";
+              } else {
+                btn.className = "btn choice-btn w-100 incorrect";
+                buttons.forEach(correctBtn => {
+                  if (correctBtn.textContent === question.answer) {
+                    correctBtn.className = "btn choice-btn w-100 correct";
+                  }
+                });
+              }
+              btn.disabled = true;
+            } else {
+              btn.disabled = true;
+            }
+          });
+        }
+      }
+
+      function selectAnswer(selected, btn) {
+        const questionIndex = selectedQuestions[currentQuestionIndex];
+        const question = questionsData[questionIndex];
+        const isCorrect = selected === question.answer;
+
+        if (userAnswers[currentQuestionIndex] === null) {
+          if (isCorrect) {
+            score++;
+            document.getElementById("currentScore").textContent = score;
+          }
+        }
+
+        userAnswers[currentQuestionIndex] = {
+          selected: selected,
+          correct: isCorrect,
+          correctAnswer: question.answer,
+        };
+
+        const buttons = document.querySelectorAll(".choice-btn");
+        buttons.forEach(button => {
+          button.disabled = true;
+          if (button.textContent === question.answer) {
+            button.className = "btn choice-btn w-100 correct";
+          } else if (button === btn && !isCorrect) {
+            button.className = "btn choice-btn w-100 incorrect";
+          }
+        });
+
+        document.getElementById("nextQuestion").disabled = false;
+
+        updateExamState("selectAnswer");
+      }
+
+      async function updateExamState(type) {
+        if (!window.currentExamCode) return;
+
+        const updatedState = {
+          selectedQuestions,
+          currentQuestionIndex,
+          userAnswers,
+          score,
+          selectedCategories: Array.from(selectedCategories),
+          selectedExams: Array.from(selectedExams),
+          isDone: false,
+          questionsCount: selectedQuestions.length,
+          createdAt: createdAt,
+        };
+
+        await idbSet("exams", window.currentExamCode, updatedState);
+
+        if ((await checkOnline()) && currentUserId) {
+          if (type === "selectAnswer") {
+            syncExamToCloudSelectAnswer(updatedState, window.currentExamCode);
+          } else if (type === "nextQuestion") {
+            syncExamToCloudNextQuestion(updatedState, window.currentExamCode);
+          }
+        }
+      }
+
+      document.getElementById("nextQuestion").onclick = function () {
+        if (currentQuestionIndex < selectedQuestions.length - 1) {
+          currentQuestionIndex++;
+          showQuestion();
+        } else {
+          finishQuiz();
+        }
+      };
+
+      document.getElementById("saveAndReturn").onclick = function () {
+        updateExamState();
+        showSmartToast("تم حفظ الاختبار بنجاح", "success");
+        location.reload();
+      };
+
+      document.getElementById("cancelAndReturn").onclick = function () {
+        openDeleteModal("cancel_exam", currentExamCode);
+      };
+
+      async function finishQuiz() {
+        clearInterval(timerInterval);
+
+        document.getElementById("quizScreen").style.display = "none";
+        document.getElementById("resultsScreen").style.display = "block";
+
+        const totalQuestions = selectedQuestions.length;
+        const correctAnswers = userAnswers.filter(a => a && a.correct).length;
+        const wrongAnswers = totalQuestions - correctAnswers;
+        const percentage = Math.round((correctAnswers / totalQuestions) * 100);
+
+        document.getElementById(
+          "finalScore"
+        ).textContent = `${correctAnswers}/${totalQuestions}`;
+        document.getElementById("percentage").textContent = `${percentage}%`;
+        document.getElementById("correctAnswers").textContent = correctAnswers;
+        document.getElementById("wrongAnswers").textContent = wrongAnswers;
+
+        if (window.currentExamCode) {
+          const finalState = {
+            currentQuestionIndex,
+            userAnswers,
+            score,
+            questionsCount: totalQuestions,
+            correctAnswers,
+            wrongAnswers,
+            percentage,
+            selectedQuestions,
+            selectedCategories: Array.from(selectedCategories),
+            selectedExams: Array.from(selectedExams),
+            isDone: true,
+            createdAt: createdAt,
+          };
+
+          await idbSet("exams", window.currentExamCode, finalState);
+          if ((await checkOnline()) && currentUserId) {
+            syncFinalExamToCloud(finalState, window.currentExamCode);
+          }
+        }
+      }
+
+      const migrateOldData = examState => {
+        if (
+          examState.selectedQuestions.length > 0 &&
+          typeof examState.selectedQuestions[0] === "object"
+        ) {
+          examState.selectedQuestions = examState.selectedQuestions.map(q =>
+            questionsData.findIndex(
+              item =>
+                item.category === q.category &&
+                item.exam === q.exam &&
+                item.question_number === q.question_number
+            )
+          );
+          return true;
+        }
+        return false;
+      };
+
+      async function loadExamByCode(examCode) {
+        const data = await idbGet("exams", examCode);
+
+        if (!data) {
+          return;
+        }
+
+        const examState = data;
+
+        if (migrateOldData(examState)) {
+          await idbSet("exams", examCode, examState);
+        }
+
+        selectedQuestions = examState.selectedQuestions.map(
+          index => questionsData[index]
+        );
+
+        window.currentExamCode = examCode;
+
+        selectedQuestions = examState.selectedQuestions;
+        userAnswers = examState.userAnswers;
+        selectedCategories = new Set(examState.selectedCategories);
+        selectedExams = new Set(examState.selectedExams);
+        createdAt = examState.createdAt || null;
+
+        if (examState.isDone) {
+          document.getElementById("setupScreen").style.display = "none";
+          document.getElementById("quizScreen").style.display = "none";
+          document.getElementById("resultsScreen").style.display = "block";
+
+          document.getElementById(
+            "finalScore"
+          ).textContent = `${examState.correctAnswers}/${examState.questionsCount}`;
+          document.getElementById(
+            "percentage"
+          ).textContent = `${examState.percentage}%`;
+          document.getElementById("correctAnswers").textContent =
+            examState.correctAnswers;
+          document.getElementById("wrongAnswers").textContent =
+            examState.wrongAnswers;
+
+          return;
+        }
+
+        currentQuestionIndex = examState.currentQuestionIndex;
+        score = examState.score;
+
+        document.getElementById("setupScreen").style.display = "none";
+        document.getElementById("quizScreen").style.display = "block";
+        document.getElementById("totalQuestionsNum").textContent =
+          selectedQuestions.length;
+
+        showQuestion();
+      }
+
+      let deleteAction = null;
+      let deleteTarget = null;
+
+      function openDeleteModal(type, code = null) {
+        const modalBody = document.getElementById("deleteConfirmModalBody");
+        if (type === "single") {
+          modalBody.textContent =
+            "هل أنت متأكد أنك تريد حذف هذا الاختبار؟ لا يمكن التراجع عن هذا الإجراء.";
+          deleteAction = "single";
+          deleteTarget = code;
+        } else if (type === "all") {
+          modalBody.textContent =
+            "هل أنت متأكد أنك تريد حذف جميع الاختبارات السابقة؟ لا يمكن التراجع عن هذا الإجراء.";
+          deleteAction = "all";
+          deleteTarget = null;
+        } else if (type === "account") {
+          modalBody.textContent =
+            "هل أنت متأكد أنك تريد حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء.";
+          deleteAction = "account";
+        } else if (type === "cancel_exam") {
+          modalBody.textContent =
+            "هل أنت متأكد من إلغاء الاختبار؟ سيتم فقدان التقدم الحالي.";
+          deleteAction = "cancel_exam";
+          deleteTarget = code;
+        } else if (type == "delete_review_box") {
+          modalBody.textContent =
+            "هل أنت متأكد أنك تريد حذف صندوق المراجعة؟ لا يمكن التراجع عن هذا الإجراء.";
+          deleteAction = "delete_review_box";
+          deleteTarget = null;
+        } else {
+          console.error("Unknown delete type:", type);
+          return;
+        }
+        const modal = new bootstrap.Modal(
+          document.getElementById("deleteConfirmModal")
+        );
+        modal.show();
+      }
+
+      document.getElementById("confirmDeleteBtn").onclick = async function () {
+        if (deleteAction === "single" && deleteTarget) {
+          doDeleteSingleExam(deleteTarget);
+        } else if (deleteAction === "all") {
+          await doDeleteAllPreviousExams();
+        } else if (deleteAction === "account") {
+          await doDeleteAccount();
+        } else if (deleteAction === "cancel_exam" && deleteTarget) {
+          doDeleteSingleExam(deleteTarget);
+          showSmartToast("تم إلغاء الاختبار", "info");
+          location.reload();
+        } else if (deleteAction === "delete_review_box") {
+          clearReviewBox();
+          showSmartToast("تم حذف صندوق المراجعة بنجاح.", "success");
+        } else {
+          console.error("Unknown delete action:", deleteAction);
+        }
+
+        const modal = bootstrap.Modal.getInstance(
+          document.getElementById("deleteConfirmModal")
+        );
+        if (modal) modal.hide();
+      };
+
+      async function doDeleteSingleExam(code) {
+        if ((await checkOnline()) && currentUserId) {
+          try {
+            await fetch("cloud_sync.php", {
+              method: "POST",
+              body: new URLSearchParams({
+                action: "delete_single_exam",
+                user_id: currentUserId,
+                js_id: code,
+              }),
+            });
+          } catch (error) {
+            console.error("Error deleting from server:", error);
+          }
+        }
+
+        await idbDelete("exams", code);
+        const keys = JSON.parse(
+          localStorage.getItem("previousExams25") || "[]"
+        );
+        const updatedKeys = keys.filter(c => c !== code);
+        localStorage.setItem("previousExams25", JSON.stringify(updatedKeys));
+        showSmartToast("تم حذف الاختبار بنجاح.", "success");
+        showExamsHistory();
+      }
+
+      async function doDeleteAllPreviousExams() {
+        if ((await checkOnline()) && currentUserId) {
+          await fetch("cloud_sync.php", {
+            method: "POST",
+            body: new URLSearchParams({
+              action: "delete_all_exams",
+              user_id: currentUserId,
+            }),
+          });
+        }
+
+        const keys = JSON.parse(
+          localStorage.getItem("previousExams25") || "[]"
+        );
+        await Promise.all(keys.map(code => idbDelete("exams", code)));
+
+        localStorage.removeItem("previousExams25");
+        showSmartToast("تم حذف جميع الاختبارات السابقة بنجاح.", "success");
+        showExamsHistory();
+      }
+
+      async function doDeleteAccount() {
+        if ((await checkOnline()) && currentUserId) {
+          await fetch("cloud_sync.php", {
+            method: "POST",
+            body: new URLSearchParams({
+              action: "delete_account",
+              user_id: currentUserId,
+            }),
+          });
+        }
+
+        localStorage.removeItem("user_id25");
+        localStorage.removeItem("user_name25");
+        syncInfoAlertVisibleToggle();
+        const keys = JSON.parse(
+          localStorage.getItem("previousExams25") || "[]"
+        );
+        await Promise.all(keys.map(code => idbDelete("exams", code)));
+
+        localStorage.removeItem("previousExams25");
+        updateSettingsUI();
+        showSmartToast("تم حذف الحساب وجميع بياناتك بنجاح.", "success");
+      }
+
+      document.getElementById("reviewAll").onclick = () => showReview(false);
+      document.getElementById("reviewWrong").onclick = () => showReview(true);
+      document.getElementById("newQuiz").onclick = function () {
+        location.reload();
+      };
+
+      document.getElementById("backToResults").onclick = function () {
+        document.getElementById("reviewScreen").style.display = "none";
+        document.getElementById("resultsScreen").style.display = "block";
+      };
+
+      async function reviewButtonClick(questionAddress) {
+        const isInReviewBoxNow = await isQuestionInReviewBox(questionAddress);
+        const reviewButton = document.getElementById(
+          `reviewButton${questionAddress}`
+        );
+        if (isInReviewBoxNow) {
+          manageReviewBox("delete", questionAddress);
+          reviewButton.innerText = "إضافة إلى صندوق المراجعة";
+        } else {
+          manageReviewBox("add", questionAddress);
+          reviewButton.innerText = "حذف من صندوق المراجعة";
+        }
+        syncReviewBoxToCloud();
+      }
+
+      let wrongOnly = 0;
+      let is_questionCount_equals_inReviewBoxCount = false;
+
+      async function showReview(wrongOnly) {
+        document.getElementById("resultsScreen").style.display = "none";
+        document.getElementById("reviewScreen").style.display = "block";
+        document.getElementById("reviewTitle").textContent = wrongOnly
+          ? "مراجعة الأسئلة الخاطئة"
+          : "مراجعة جميع الأسئلة";
+
+        const reviewContent = document.getElementById("reviewContent");
+        reviewContent.innerHTML = "";
+        let questionCount = 0;
+        let inReviewBoxCount = 0;
+
+        for (let index = 0; index < selectedQuestions.length; index++) {
+          let question = selectedQuestions[index];
+          question = questionsData[question];
+          const userAnswer = userAnswers[index];
+          if (wrongOnly && (!userAnswer || userAnswer.correct)) continue;
+
+          questionCount++;
+
+          const questionDiv = document.createElement("div");
+          questionDiv.className = "card mb-4";
+          const questionAddress = `${question.category}.${question.exam}.${question.question_number}`;
+
+          const isInReviewBoxNow = await isQuestionInReviewBox(questionAddress);
+          if (isInReviewBoxNow) inReviewBoxCount++;
+          const reviewButtonTextContent = isInReviewBoxNow
+            ? "حذف من صندوق المراجعة"
+            : "إضافة إلى صندوق المراجعة";
+
+          let html = `
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="card-title">السؤال ${index + 1}</h5>
+              <button class="btn btn-sm btn-outline-warning review-button-results-screen" onclick="reviewButtonClick('${questionAddress}')" id="reviewButton${questionAddress}">${reviewButtonTextContent}</button>
+            </div>
+            ${
+              question.passage
+                ? `<div class="passage">${question.passage}</div>`
+                : ""
+            }
+            <p class="mb-3">${question.question}</p>
+            <div class="row">
+        `;
+          [...new Set(question.choices)].forEach(choice => {
+            let className = "btn btn-outline-secondary";
+            let icon = "";
+
+            if (choice === question.answer) {
+              className = "btn btn-success";
+              icon = " ✓";
+            } else if (
+              userAnswer &&
+              choice === userAnswer.selected &&
+              !userAnswer.correct
+            ) {
+              className = "btn btn-danger";
+              icon = " ✗";
+            }
+
+            html += `
+    <div class="col-md-6 mb-2">
+      <button class="${className} w-100" disabled>
+        ${choice}${icon}
+      </button>
+    </div>
+  `;
+          });
+
+          html += `
+            </div>
+            <div class="mt-3">
+              <small class="text-muted">
+                ${
+                  userAnswer
+                    ? userAnswer.correct
+                      ? '<span class="text-success">✓ إجابة صحيحة</span>'
+                      : `<span class="text-danger">✗ إجابة خاطئة</span> - الإجابة الصحيحة: ${question.answer}`
+                    : '<span class="text-warning">لم يتم الإجابة</span>'
+                }
+              </small>
+            </div>
+          </div>
+        `;
+
+          questionDiv.innerHTML = html;
+          reviewContent.appendChild(questionDiv);
+        }
+
+        if (questionCount == inReviewBoxCount)
+          is_questionCount_equals_inReviewBoxCount = true;
+
+        document.getElementById("addAllToReviewBoxDropdownItem").innerText =
+          !is_questionCount_equals_inReviewBoxCount
+            ? "إضافة جميع الأسئلة إلى صندوق المراجعة"
+            : "حذف جميع الأسئلة إلى صندوق المراجعة";
+      }
+
+      function addAllReviewToReviewBox() {
+        selectedQuestions.forEach((question, index) => {
+          if (wrongOnly && (!userAnswer || userAnswer.correct)) return;
+          const questionAddress = `${question.category}.${question.exam}.${question.question_number}`;
+          if (!is_questionCount_equals_inReviewBoxCount) {
+            manageReviewBox("add", questionAddress);
+          } else {
+            manageReviewBox("delete", questionAddress);
+          }
+        });
+        let buttons = document.getElementsByClassName(
+          "review-button-results-screen"
+        );
+        Array.from(buttons).forEach(element => {
+          if (!is_questionCount_equals_inReviewBoxCount) {
+            element.innerText = "حذف من صندوق المراجعة";
+          } else {
+            element.innerText = "إضافة إلى صندوق المراجعة";
+          }
+        });
+        is_questionCount_equals_inReviewBoxCount =
+          !is_questionCount_equals_inReviewBoxCount;
+
+        document.getElementById("addAllToReviewBoxDropdownItem").innerText =
+          !is_questionCount_equals_inReviewBoxCount
+            ? "إضافة جميع الأسئلة إلى صندوق المراجعة"
+            : "حذف جميع الأسئلة إلى صندوق المراجعة";
+      }
+
+      function removeDuplicates(arr) {
+        return [...new Set(arr)];
+      }
+
+      function shuffleQuestionsSmart(questions) {
+        const passageGroups = new Map();
+        const singles = [];
+        questions.forEach(q => {
+          if (q.passage) {
+            if (!passageGroups.has(q.passage)) passageGroups.set(q.passage, []);
+            passageGroups.get(q.passage).push(q);
+          } else {
+            singles.push([q]);
+          }
+        });
+
+        const grouped = Array.from(passageGroups.values()).map(group =>
+          shuffleArray(group)
+        );
+
+        const allGroups = [...grouped, ...singles];
+
+        const shuffledGroups = shuffleArray(allGroups);
+
+        return shuffledGroups.flat();
+      }
+
+      async function showExamsHistory() {
+        const parent = document.getElementById("nav-exams");
+        parent.innerHTML = `
+                <div class="text-center py-5">
+                  <div class="spinner-border text-primary" style="width: 3rem; height: 3rem" role="status">
+                    <span class="visually-hidden">جاري التحميل...</span>
+                  </div>
+                  <div class="mt-3 text-muted">جاري تحميل سجل الاختبارات...</div>
+                </div>
+              `;
+
+        try {
+          if ((await checkOnline()) && currentUserId) {
+            await updateLocalExamsFromCloud();
+          }
+
+          parent.innerHTML = "";
+
+          const examsContainer = document.querySelector(
+            "#nav-exams .card.mb-4"
+          );
+          if (examsContainer) examsContainer.style.display = "none";
+
+          let listDiv = document.getElementById("examsHistoryList");
+          if (!listDiv) {
+            listDiv = document.createElement("div");
+            listDiv.id = "examsHistoryList";
+            parent.appendChild(listDiv);
+          }
+          listDiv.innerHTML = "";
+
+          const codes = JSON.parse(
+            localStorage.getItem("previousExams25") || "[]"
+          );
+          const exams = (
+            await Promise.all(
+              codes.map(async code => {
+                const data = await idbGet("exams", code);
+                if (!data) return null;
+                const obj = data;
+                obj._code = code;
+                return obj;
+              })
+            )
+          ).filter(Boolean);
+
+          exams.sort((a, b) => {
+            if (a.isDone !== b.isDone) return a.isDone - b.isDone;
+            return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+          });
+
+          if (exams.length === 0) {
+            listDiv.innerHTML =
+              '<div class="alert alert-info mt-3">لا يوجد اختبارات محفوظة.</div>';
+            return;
+          }
+
+          exams.forEach(exam => {
+            const card = document.createElement("div");
+            card.className = "card mb-3";
+            let sections = (exam.selectedCategories || []).join("، ");
+            let examsList = (exam.selectedExams || []).join("، ");
+            let dateStr = exam.createdAt
+              ? new Date(exam.createdAt).toLocaleString("ar-EG", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  year: "numeric",
+                  month: "numeric",
+                  day: "numeric",
+                })
+              : "-";
+            let state = exam.isDone
+              ? '<span class="badge bg-success">مكتمل</span>'
+              : '<span class="badge bg-warning text-dark">غير مكتمل</span>';
+            let info = `
+                    <div class="card-body">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>${state}</div>
+                        <div><small class="text-muted">${dateStr}</small></div>
+                      </div>
+                      <div class="mb-2"><strong>عدد الأسئلة:</strong> ${
+                        exam.questionsCount
+                      }</div>
+                      <div class="mb-2"><strong>الأقسام:</strong> ${
+                        sections || "-"
+                      }</div>
+                      <div class="mb-2"><strong>الاختبارات:</strong> ${
+                        examsList || "-"
+                      }</div>
+                  `;
+            if (exam.isDone) {
+              info += `<div class="mb-2"><strong>النسبة المئوية:</strong> ${
+                exam.percentage || 0
+              }%</div>`;
+            } else {
+              const completed =
+                exam.userAnswers?.filter(a => a !== null).length || 0;
+              const remaining = (exam.questionsCount || 0) - completed;
+              info += `<div class="mb-2"><strong>الأسئلة المكتملة:</strong> ${completed} | <strong>الأسئلة المتبقية:</strong> ${remaining}</div>`;
+            }
+            info += '<div class="d-flex gap-2 mt-3">';
+            info += `<button class="btn btn-danger btn" onclick="openDeleteModal('single', '${exam._code}')">حذف</button>`;
+            if (exam.isDone) {
+              info += `<button class="btn btn-primary btn" onclick="loadExamByCode('${exam._code}')">مراجعة</button>`;
+            } else {
+              info += `<button class="btn btn-success btn" onclick="loadExamByCode('${exam._code}')">إكمال</button>`;
+            }
+            info += "</div></div>";
+            card.innerHTML = info;
+            listDiv.appendChild(card);
+          });
+        } catch (error) {
+          console.error("Error loading exams history:", error);
+          parent.innerHTML = `
+                  <div class="alert alert-danger mt-3">
+                    حدث خطأ أثناء تحميل سجل الاختبارات. يرجى المحاولة مرة أخرى.
+                  </div>
+                `;
+        }
+        migrateAllExams();
+      }
+
+      window.addEventListener("load", function () {
+        document.getElementById("loadingPlaceholder").style.display = "none";
+      });
+
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .register("/verbal/2025secret/service-worker.js")
+          .then(reg => {
+            console.log("SW registered, scope:", reg.scope);
+            // optional: listen for updates
+            reg.addEventListener("updatefound", () => {
+              const inst = reg.installing;
+              inst.addEventListener("statechange", () =>
+                console.log("SW state:", inst.state)
+              );
+            });
+          })
+          .catch(err => console.error("SW register failed:", err));
+      }
+
+      async function checkOnline() {
+        if (!navigator.onLine) return false;
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3000);
+          const response = await fetch("/ping.txt", {
+            method: "GET",
+            cache: "no-store",
+            signal: controller.signal,
+          });
+          clearTimeout(timeoutId);
+          return response.ok;
+        } catch {
+          return false;
+        }
+      }
+
+      let currentUserId = localStorage.getItem("user_id25") || null;
+
+      async function registerUser(name) {
+        const res = await fetch("cloud_sync.php", {
+          method: "POST",
+          body: new URLSearchParams({ action: "register", name }),
+        });
+        const data = await res.json();
+        if (data.user_id) {
+          localStorage.setItem("user_id25", data.user_id);
+          currentUserId = data.user_id;
+          return data.user_id;
+        }
+        throw new Error(data.error || "Registration failed");
+      }
+
+      async function loginUser(id) {
+        const res = await fetch("cloud_sync.php", {
+          method: "POST",
+          body: new URLSearchParams({ action: "login", id }),
+        });
+        const data = await res.json();
+        if (data.user_id) {
+          localStorage.setItem("user_id25", data.user_id);
+          currentUserId = data.user_id;
+          return data;
+        }
+        if (data.error === "User not found") {
+          throw new Error("المعرف المدخل غير صحيح");
+        }
+        throw new Error(data.error || "فشل تسجيل الدخول");
+      }
+
+      async function syncNewExamToCloud(examData, js_id) {
+        if (!(await checkOnline()) || !currentUserId) return;
+
+        await fetch("cloud_sync.php", {
+          method: "POST",
+          body: new URLSearchParams({
+            action: "create_exam",
+            user_id: currentUserId,
+            selectedQuestions: JSON.stringify(examData.selectedQuestions),
+            userAnswers: JSON.stringify(examData.userAnswers),
+            selectedCategories: JSON.stringify(examData.selectedCategories),
+            selectedExams: JSON.stringify(examData.selectedExams),
+            questionsCount: examData.questionsCount,
+            createdAt: examData.createdAt,
+            js_id,
+          }),
+        });
+      }
+
+      async function syncExamToCloud(examData, js_id) {
+        if (!(await checkOnline()) || !currentUserId) return;
+
+        await fetch("cloud_sync.php", {
+          method: "POST",
+          body: new URLSearchParams({
+            action: "update_exam",
+            state: "in_progress",
+            user_id: currentUserId,
+            currentQuestionIndex: examData.currentQuestionIndex,
+            userAnswers: JSON.stringify(examData.userAnswers),
+            score: examData.score,
+            js_id,
+          }),
+        });
+      }
+
+      async function syncExamToCloudSelectAnswer(examData, js_id) {
+        if (!(await checkOnline()) || !currentUserId) return;
+
+        await fetch("cloud_sync.php", {
+          method: "POST",
+          body: new URLSearchParams({
+            action: "update_exam",
+            state: "in_progress",
+            user_id: currentUserId,
+            userAnswers: JSON.stringify(examData.userAnswers),
+            score: examData.score,
+            currentQuestionIndex: examData.currentQuestionIndex,
+            js_id,
+          }),
+        });
+      }
+
+      async function syncExamToCloudNextQuestion(examData, js_id) {
+        if (!(await checkOnline()) || !currentUserId) return;
+
+        await fetch("cloud_sync.php", {
+          method: "POST",
+          body: new URLSearchParams({
+            action: "update_exam",
+            state: "in_progress",
+            user_id: currentUserId,
+            currentQuestionIndex: examData.currentQuestionIndex,
+            js_id,
+          }),
+        });
+      }
+
+      async function syncFinalExamToCloud(examData, js_id) {
+        if (!(await checkOnline()) || !currentUserId) return;
+
+        await fetch("cloud_sync.php", {
+          method: "POST",
+          body: new URLSearchParams({
+            action: "update_exam",
+            state: "ended",
+            user_id: currentUserId,
+            currentQuestionIndex: examData.currentQuestionIndex,
+            userAnswers: JSON.stringify(examData.userAnswers),
+            score: examData.score,
+            questionsCount: examData.questionsCount,
+            correctAnswers: examData.correctAnswers,
+            wrongAnswers: examData.wrongAnswers,
+            percentage: examData.percentage,
+            js_id,
+          }),
+        });
+      }
+
+      async function getStaticDataFromServer(js_id) {
+        if (!(await checkOnline())) return;
+
+        const res = await fetch("cloud_sync.php", {
+          method: "POST",
+          body: new URLSearchParams({
+            action: "get_static_data",
+            js_id,
+          }),
+        });
+        const data = await res.json();
+        if (data.ok) {
+          data.selectedQuestions = data.selectedQuestions.map(q => {
+            if (typeof q === "number") {
+              return q;
+            } else if (q && typeof q === "object") {
+              return questionsData.findIndex(
+                item =>
+                  item.category === q.category &&
+                  item.exam === q.exam &&
+                  item.question_number === q.question_number
+              );
+            }
+            return -1;
+          });
+          return data;
+        } else {
+          console.error("Failed to fetch static data:", data.error);
+        }
+      }
+
+      async function syncAllLocalExamsToCloud() {
+        if (!(await checkOnline()) || !currentUserId) return;
+        const codes = JSON.parse(
+          localStorage.getItem("previousExams25") || "[]"
+        );
+        for (const code of codes) {
+          const data = await idbGet("exams", code);
+          if (data) {
+            await syncExamToCloud(data, code);
+          }
+        }
+      }
+
+      async function syncReviewBoxToCloud() {
+        if (!(await checkOnline()) || !currentUserId) return;
+        const data = await loadReviewBox();
+        if (data) {
+          const res = await fetch("cloud_sync.php", {
+            method: "POST",
+            body: new URLSearchParams({
+              action: "sync_review_box",
+              user_id: currentUserId,
+              data: JSON.stringify(data),
+            }),
+          });
+          const resData = await res.json();
+          if (resData) {
+            await saveReviewBox(resData);
+          }
+        }
+      }
+
+      async function updateLocalExamsFromCloud() {
+        if (!(await checkOnline()) || !currentUserId) return;
+
+        const resList = await fetch("cloud_sync.php", {
+          method: "POST",
+          body: new URLSearchParams({
+            action: "get_exams_list",
+            user_id: currentUserId,
+          }),
+        });
+        const dataList = await resList.json();
+        if (!dataList.data || !Array.isArray(dataList.data)) return;
+
+        const codes = [];
+        let i = 0;
+        for (const exam of dataList.data) {
+          let js_id = exam.js_id;
+          const examOld = (await idbGet("exams", js_id)) || null;
+
+          if (examOld) {
+            if (examOld.currentQuestionIndex >= exam.currentQuestionIndex) {
+              codes.push(js_id);
+              continue;
+            }
+          }
+
+          i++;
+
+          try {
+            const resExam = await fetch("cloud_sync.php", {
+              method: "POST",
+              body: new URLSearchParams({
+                action: "get_exam",
+                user_id: currentUserId,
+                js_id: js_id,
+              }),
+            });
+
+            if (!resExam.ok) throw new Error("Network response not ok");
+
+            const dataExam = await resExam.json();
+
+            if (!dataExam.exam) throw new Error("No exam data");
+
+            const newExamData = dataExam.exam;
+
+            if (examOld) {
+              examOld.currentQuestionIndex = newExamData.currentQuestionIndex;
+              examOld.userAnswers = newExamData.userAnswers;
+              examOld.score = newExamData.score;
+
+              examOld.selectedQuestions = newExamData.selectedQuestions;
+              examOld.selectedCategories = newExamData.selectedCategories;
+              examOld.selectedExams = newExamData.selectedExams;
+              examOld.createdAt = newExamData.createdAt;
+
+              if (newExamData.isDone) {
+                examOld.isDone = true;
+                examOld.questionsCount = newExamData.questionsCount;
+                examOld.correctAnswers = newExamData.correctAnswers;
+                examOld.wrongAnswers = newExamData.wrongAnswers;
+                examOld.percentage = newExamData.percentage;
+              }
+
+              await idbSet("exams", js_id, JSON.stringify(examOld));
+            } else {
+              let newExamData = dataExam.exam;
+
+              let staticData = await getStaticDataFromServer(newExamData.js_id);
+
+              if (staticData) {
+                newExamData = {
+                  ...newExamData,
+                  selectedQuestions: staticData.selectedQuestions,
+                  selectedCategories: staticData.selectedCategories,
+                  selectedExams: staticData.selectedExams,
+                  createdAt: staticData.createdAt,
+                };
+
+                await idbSet("exams", js_id, newExamData);
+              }
+            }
+
+            codes.push(js_id);
+          } catch (error) {
+            console.error(
+              `Error fetching exam ${js_id} from server:`,
+              error.message
+            );
+
+            const examLocal = await idbGet("exams", js_id);
+            if (examLocal) {
+              codes.push(js_id);
+            } else {
+              console.warn(
+                `Failed to fetch exam ${js_id} from server and no local data found.`
+              );
+            }
+          }
+        }
+
+        localStorage.setItem("previousExams25", JSON.stringify(codes));
+      }
+
+      function updateSettingsUI(userObj) {
+        const userId = localStorage.getItem("user_id25");
+        const userName =
+          localStorage.getItem("user_name25") ||
+          (userObj && userObj.name) ||
+          "";
+        const loggedIn = !!userId;
+        document.getElementById("userInfoCard").style.display = loggedIn
+          ? "block"
+          : "none";
+        document.getElementById("userActionsCard").style.display = loggedIn
+          ? "block"
+          : "none";
+        document.getElementById("loginCard").style.display = loggedIn
+          ? "none"
+          : "block";
+        document.getElementById("registerCard").style.display = loggedIn
+          ? "none"
+          : "block";
+
+        syncInfoAlertVisibleToggle();
+
+        document.getElementById("deleteExamsCard").style.display = "block";
+        if (loggedIn) {
+          document.getElementById("userNameDisplay").textContent =
+            userName || "-";
+          document.getElementById("userIdDisplay").textContent = userId;
+        }
+        document.getElementById("dataConflictAlert").style.display = "none";
+      }
+
+      if (document.getElementById("registerBtn")) {
+        document.getElementById("registerBtn").onclick = async function () {
+          if (!(await checkOnline())) {
+            showSmartToast("لا يوجد اتصال بالإنترنت", "error");
+            return;
+          }
+          const name = document.getElementById("registerInput").value.trim();
+          if (!name) {
+            showSmartToast("يرجى إدخال اسم صحيح", "warning");
+            return;
+          }
+          try {
+            const userId = await registerUser(name);
+            localStorage.setItem("user_name25", name);
+            updateSettingsUI({ name });
+            showSmartToast("تم إنشاء الحساب وتسجيل الدخول بنجاح!", "success");
+
+            await syncAllLocalExamsToCloud();
+            await syncReviewBoxToCloud();
+          } catch (e) {
+            showSmartToast(e.message, "error");
+          }
+        };
+      }
+
+      if (document.getElementById("loginBtn")) {
+        document.getElementById("loginBtn").onclick = async function () {
+          if (!(await checkOnline())) {
+            showSmartToast("لا يوجد اتصال بالإنترنت", "error");
+            return;
+          }
+          const id = document.getElementById("loginInput").value.trim();
+          if (!id) {
+            showSmartToast("يرجى إدخال المعرف", "warning");
+            return;
+          }
+          try {
+            const keys = JSON.parse(
+              localStorage.getItem("previousExams25") || "[]"
+            );
+            await Promise.all(keys.map(code => idbDelete("exams", code)));
+            localStorage.removeItem("previousExams25");
+
+            const data = await loginUser(id);
+            localStorage.setItem("user_name25", data.name);
+            updateSettingsUI(data);
+            showSmartToast("تم تسجيل الدخول بنجاح!", "success");
+
+            await updateLocalExamsFromCloud();
+          } catch (e) {
+            showSmartToast(e.message, "error");
+          }
+        };
+      }
+
+      if (document.getElementById("logoutBtn")) {
+        document.getElementById("logoutBtn").onclick = function () {
+          localStorage.removeItem("user_id25");
+          localStorage.removeItem("user_name25");
+          updateSettingsUI();
+          showSmartToast("تم تسجيل الخروج", "info");
+          syncInfoAlertVisibleToggle();
+        };
+      }
+
+      if (document.getElementById("deleteAccountBtn")) {
+        document.getElementById("deleteAccountBtn").onclick = function () {
+          openDeleteModal("account");
+        };
+      }
+
+      if (document.getElementById("deleteAllExamsBtn")) {
+        document.getElementById("deleteAllExamsBtn").onclick = function () {
+          openDeleteModal("all");
+        };
+      }
+
+      if (document.getElementById("deleteReviewBoxBtn")) {
+        document.getElementById("deleteReviewBoxBtn").onclick = function () {
+          openDeleteModal("delete_review_box");
+        };
+      }
+
+      window.addEventListener("DOMContentLoaded", function () {
+        updateSettingsUI();
+      });
+
+      function syncInfoAlertVisibleToggle() {
+        const alert = document.getElementById("syncInfoAlert");
+
+        const userId = localStorage.getItem("user_id25");
+        const loggedIn = !!userId;
+
+        if (!loggedIn) {
+          alert.style.display = "block";
+        } else {
+          alert.style.display = "none";
+        }
+      }
+
+      async function manageReviewBox(action, questionAddress) {
+        let reviewBox = await loadReviewBox();
+        const timestamp = new Date().toISOString();
+
+        const index = reviewBox.findIndex(
+          item => item.q_addr === questionAddress
+        );
+
+        if (action === "add") {
+          if (index === -1) {
+            reviewBox.push({
+              q_addr: questionAddress,
+              last_modification: "add",
+              last_modification_time: timestamp,
+            });
+          } else {
+            reviewBox[index].last_modification = "add";
+            reviewBox[index].last_modification_time = timestamp;
+          }
+        } else if (action === "delete") {
+          if (index === -1) {
+            reviewBox.push({
+              q_addr: questionAddress,
+              last_modification: "delete",
+              last_modification_time: timestamp,
+            });
+          } else {
+            reviewBox[index].last_modification = "delete";
+            reviewBox[index].last_modification_time = timestamp;
+          }
+        }
+
+        await saveReviewBox(reviewBox);
+        syncReviewBoxToCloud();
+      }
+
+      async function isQuestionInReviewBox(questionAddress) {
+        const reviewBox = await loadReviewBox();
+        return reviewBox.some(
+          item =>
+            item.q_addr === questionAddress && item.last_modification === "add"
+        );
+      }
+
+      async function showReviewBox() {
+        try {
+          const parent = document.getElementById("nav-box");
+          parent.innerHTML = `
+                <div class="text-center py-5">
+                  <div class="spinner-border text-primary" style="width: 3rem; height: 3rem" role="status">
+                    <span class="visually-hidden">جاري التحميل...</span>
+                  </div>
+                  <div class="mt-3 text-muted">جاري تحميل صندوق المراجعة...</div>
+                </div>
+              `;
+
+          if ((await checkOnline()) && currentUserId) {
+            await syncReviewBoxToCloud();
+          }
+
+          parent.innerHTML = "<div id='reviewBoxContainer'></div>";
+
+          const reviewBox = await loadReviewBox();
+          const reviewBoxContainer =
+            document.getElementById("reviewBoxContainer");
+          reviewBoxContainer.innerHTML = "";
+
+          const quiz = document.createElement("div");
+          quiz.className = "card mb-3 no-print";
+          quiz.innerHTML = `<div class="card-body">
+                                    <h5 class="card-title">إجراء اختبار بمحتوى صندوق المراجعة</h5>
+                                    <div class="row">
+                                      <div class="col-md-6">
+                                        <div class="form-check mb-3">
+                                          <input
+                                            class="form-check-input"
+                                            type="checkbox"
+                                            id="shuffleQuestionsReviewBox"
+                                          />
+                                          <label class="form-check-label" for="shuffleQuestionsReviewBox"
+                                            >ترتيب الأسئلة عشوائياً</label
+                                          >
+                                        </div>
+                                      </div>
+                                      <div class="col-md-6">
+                                        <div class="form-check mb-3">
+                                          <input
+                                            class="form-check-input"
+                                            type="checkbox"
+                                            id="shuffleChoicesReviewBox"
+                                          />
+                                          <label class="form-check-label" for="shuffleChoicesReviewBox"
+                                            >ترتيب الخيارات عشوائياً</label
+                                          >
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    <button class="btn btn-secondary w-100" onclick="startQuizReviewBox()">
+                                      بدء الاختبار
+                                    </button>
+                                  </div>`;
+          reviewBoxContainer.appendChild(quiz);
+
+          const addedQuestions = reviewBox.filter(
+            item => item.last_modification === "add"
+          );
+
+          if (addedQuestions.length === 0) {
+            reviewBoxContainer.innerHTML +=
+              '<div class="alert alert-info mt-3">لا يوجد أسئلة محفوظة.</div>';
+            return;
+          }
+
+          addedQuestions.forEach(item => {
+            const [category, exam, questionNumber] = item.q_addr.split(".");
+            const questionIndex = questionNumber;
+
+            if (!questionsData || questionsData.length === 0) {
+              console.error("questionsData غير متوفرة أو فارغة.");
+              return;
+            }
+
+            const questionData = questionsData.find(
+              q =>
+                q.category === category &&
+                q.exam === exam &&
+                q.question_number == questionNumber
+            );
+
+            if (!questionData || !questionData.choices) {
+              console.warn(
+                `لم يتم العثور على السؤال أو الخيارات: ${item.q_addr}`
+              );
+              return;
+            }
+
+            const card = document.createElement("div");
+            card.className = "card mb-3";
+
+            questionData.choices = removeDuplicates(questionData.choices);
+
+            card.innerHTML = `
+                <div class="card-body" id="reviewBoxItem-${item.q_addr}">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                      <!-- <div class="form-check-inline">
+                          <input class="form-check-input" type="checkbox" value="" id="">
+                      </div> -->
+                        <span class="badge bg-primary">${
+                          questionData.exam
+                        }</span>
+                        <span class="badge bg-secondary">${
+                          questionData.category
+                        }</span>
+                      </div>
+                    <div>
+                      <button class="btn btn-sm btn-outline-danger" onclick="removeFromReviewBox('${
+                        item.q_addr
+                      }')">
+                        حذف من صندوق المراجعة
+                      </button>
+                    </div>
+                  </div>
+                  <h5 class="card-title">${
+                    questionData.question || "السؤال غير متوفر"
+                  }</h5>
+                  <ul class="list-group my-3">
+                    ${(questionData.choices || [])
+                      .map(
+                        choice => `<li class="list-group-item">${choice}</li>`
+                      )
+                      .join("")}
+                  </ul>
+                  <button class="btn btn-sm btn-outline-info show-answer-btn" data-idx="${
+                    item.q_addr
+                  }">إظهار الحل</button>
+                  <div class="answer-container mt-2" style="display: none;">
+                    <span class="badge bg-success">الحل الصحيح: ${
+                      questionData.answer
+                    }</span>
+                  </div>
+                </div>
+              `;
+
+            reviewBoxContainer.appendChild(card);
+          });
+        } catch (error) {
+          parent.innerHTML = `
+                  <div class="alert alert-danger mt-3">
+                    حدث خطأ أثناء تحميل صندوق المراجعة. يرجى المحاولة مرة أخرى.
+                  </div>
+                `;
+          console.error("Error loading review box:", error);
+          return;
+        }
+      }
+
+      async function removeFromReviewBox(questionAddress) {
+        const reviewBox = await loadReviewBox();
+        const updatedReviewBox = reviewBox.map(item => {
+          if (item.q_addr === questionAddress) {
+            return {
+              ...item,
+              last_modification: "delete",
+              last_modification_time: new Date().toISOString(),
+            };
+          }
+          return item;
+        });
+
+        await saveReviewBox(updatedReviewBox);
+
+        showReviewBox();
+
+        showSmartToast("تم حذف السؤال من صندوق المراجعة.", "success");
+        syncReviewBoxToCloud();
+      }
+
+      async function clearReviewBox() {
+        await saveReviewBox([]);
+
+        showReviewBox();
+        showSmartToast("تم حذف صندوق المراجعة بالكامل.", "success");
+        syncReviewBoxToCloud();
+      }
+
+      document
+        .getElementById("nav-box-tab")
+        .addEventListener("click", showReviewBox);
+
+      document.addEventListener("click", function (event) {
+        if (event.target.classList.contains("show-answer-btn")) {
+          const answerContainer = event.target.nextElementSibling;
+          if (answerContainer) {
+            if (answerContainer.style.display === "none") {
+              answerContainer.style.display = "block";
+              event.target.textContent = "إخفاء الحل";
+            } else {
+              answerContainer.style.display = "none";
+              event.target.textContent = "إظهار الحل";
+            }
+          }
+        }
+      });
+
+      document.addEventListener("change", async function (event) {
+        if (event.target.classList.contains("form-check-input")) {
+          const questionAddress = event.target
+            .closest(".card-body")
+            .id.replace("reviewBoxItem-", "");
+          const isChecked = event.target.checked;
+
+          const reviewBox = await loadReviewBox();
+          const updatedReviewBox = reviewBox.map(item => {
+            if (item.q_addr === questionAddress) {
+              return { ...item, isSelected: isChecked };
+            }
+            return item;
+          });
+
+          await saveReviewBox(updatedReviewBox);
+        }
+      });
+
+      async function startQuizReviewBox() {
+        selectedCategories.add("صندوق المراجعة");
+        selectedExams.add("جميع الأسئلة");
+
+        const allItems = await loadReviewBox();
+        const addedOnly = allItems.filter(
+          item => item.last_modification === "add"
+        );
+
+        electedQuestions = [];
+
+        addedOnly.forEach(item => {
+          const [category, exam, questionNumber] = item.q_addr.split(".");
+
+          const foundQuestion = questionsData.find(
+            q =>
+              q.category === category &&
+              q.exam === exam &&
+              q.question_number == questionNumber
+          );
+
+          if (foundQuestion) {
+            selectedQuestions.push(foundQuestion);
+          }
+        });
+
+        if (selectedQuestions.length === 0) {
+          showSmartToast("لا توجد أسئلة متاحة للاختيارات المحددة", "warning");
+          return;
+        }
+
+        if (document.getElementById("shuffleQuestionsReviewBox").checked) {
+          selectedQuestions = shuffleQuestionsSmart(selectedQuestions);
+        }
+
+        if (document.getElementById("shuffleChoicesReviewBox").checked) {
+          selectedQuestions.forEach(q => {
+            if (q.choices) {
+              q.choices = shuffleArray([...q.choices]);
+            }
+          });
+        }
+
+        userAnswers = new Array(selectedQuestions.length).fill(null);
+        currentQuestionIndex = 0;
+        score = 0;
+
+        document.getElementById("setupScreen").style.display = "none";
+        document.getElementById("quizScreen").style.display = "block";
+        document.getElementById("totalQuestionsNum").textContent =
+          selectedQuestions.length;
+
+        showQuestion();
+
+        const uniqueCode = generateUniqueCode();
+        window.currentExamCode = uniqueCode;
+
+        createdAt = new Date().toISOString();
+
+        const examState = {
+          selectedQuestions,
+          userAnswers: new Array(selectedQuestions.length).fill(null),
+          selectedCategories: Array.from(selectedCategories),
+          selectedExams: Array.from(selectedExams),
+          questionsCount: selectedQuestions.length,
+          createdAt: createdAt,
+        };
+
+        await idbSet("exams", uniqueCode, examState);
+
+        const previousCodes = JSON.parse(
+          localStorage.getItem("previousExams25") || "[]"
+        );
+        previousCodes.push(uniqueCode);
+        localStorage.setItem("previousExams25", JSON.stringify(previousCodes));
+
+        if ((await checkOnline()) && currentUserId) {
+          syncNewExamToCloud(examState, uniqueCode);
+        }
+      }
+
+      document
+        .getElementById("loadExamFileInput")
+        .addEventListener("change", function (event) {
+          const file = event.target.files[0];
+          if (!file) return;
+
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            try {
+              const examState = JSON.parse(e.target.result);
+
+              if (!examState.selectedQuestions || !examState.questionsCount) {
+                alert("الملف لا يحتوي على اختبار صالح.");
+                return;
+              }
+
+              selectedQuestions = examState.selectedQuestions;
+              userAnswers =
+                examState.userAnswers ||
+                new Array(selectedQuestions.length).fill(null);
+              currentQuestionIndex = examState.currentQuestionIndex || 0;
+              score = examState.score || 0;
+              selectedCategories = new Set(examState.selectedCategories || []);
+              selectedExams = new Set(examState.selectedExams || []);
+              createdAt = examState.createdAt || new Date().toISOString();
+              window.currentExamCode = null;
+
+              document.getElementById("setupScreen").style.display = "none";
+              document.getElementById("quizScreen").style.display = "block";
+              document.getElementById("totalQuestionsNum").textContent =
+                selectedQuestions.length;
+
+              showQuestion();
+            } catch (error) {
+              alert("حدث خطأ أثناء قراءة الملف: " + error.message);
+            }
+          };
+
+          reader.readAsText(file);
+        });
+
+      function openDB() {
+        return new Promise((resolve, reject) => {
+          const request = indexedDB.open("quizDB25", 1);
+          request.onupgradeneeded = function (event) {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains("exams")) {
+              db.createObjectStore("exams");
+            }
+            if (!db.objectStoreNames.contains("meta")) {
+              db.createObjectStore("meta");
+            }
+          };
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error);
+        });
+      }
+
+      async function idbSet(storeName, key, value) {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(storeName, "readwrite");
+          tx.objectStore(storeName).put(value, key);
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error);
+        });
+      }
+
+      async function idbGet(storeName, key) {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(storeName, "readonly");
+          const req = tx.objectStore(storeName).get(key);
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        });
+      }
+
+      async function idbDelete(storeName, key) {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(storeName, "readwrite");
+          tx.objectStore(storeName).delete(key);
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error);
+        });
+      }
+
+      async function saveReviewBox(reviewBoxArray) {
+        function isErrorNoData(reviewBoxArray) {
+          return reviewBoxArray && reviewBoxArray.error === "No data" ? 1 : 0;
+        }
+        if (isErrorNoData(reviewBoxArray)) {
+          console.error("No data to save in reviewBox");
+          return;
+        }
+        await idbSet("meta", "reviewBox", reviewBoxArray || []);
+      }
+      async function loadReviewBox() {
+        const data = await idbGet("meta", "reviewBox");
+        return data || [];
+      }
+
+      async function migrateDataToIDB() {
+        const existingReviewBox = await idbGet("meta", "reviewBox");
+        if (!existingReviewBox) {
+          const oldReviewBox = await loadReviewBox();
+          await saveReviewBox(oldReviewBox);
+          console.log("✅ reviewBox migrated to IndexedDB");
+          localStorage.removeItem("reviewBox");
+        }
+
+        const previousCodes = JSON.parse(
+          localStorage.getItem("previousExams25") || "[]"
+        );
+        for (const code of previousCodes) {
+          const examData = localStorage.getItem(code);
+
+          if (examData) {
+            await idbSet("exams", code, JSON.parse(examData));
+            console.log(`✅ Exam data for ${code} migrated to IndexedDB`);
+            localStorage.removeItem(code);
+          }
+        }
+      }
+      window.addEventListener("load", migrateDataToIDB);
+
+      async function startRandomQuiz(
+        numberOfQuestions,
+        shuffleChoices = false
+      ) {
+        if (numberOfQuestions < 0) {
+          numberOfQuestions = parseInt(
+            document.getElementById("totalQuestionsInputs").value
+          );
+          shuffleChoices = document.getElementById(
+            "shuffleChoicesInput"
+          ).checked;
+        } else {
+          numberOfQuestions = parseInt(numberOfQuestions);
+        }
+
+        // --- 1. التحقق من المدخلات وصحة البيانات ---
+        if (!questionsData || questionsData.length === 0) {
+          // console.error(
+          //   "قاعدة بيانات الأسئلة (questionsData) فارغة أو لم يتم تحميلها بعد."
+          // );
+          if (showSmartToast)
+            showSmartToast("قاعدة بيانات الأسئلة فارغة.", "error");
+          return;
+        }
+        if (
+          typeof numberOfQuestions !== "number" ||
+          !Number.isInteger(numberOfQuestions) ||
+          numberOfQuestions <= 0
+        ) {
+          // console.error("خطأ: يجب إدخال عدد صحيح وموجب للأسئلة.");
+          if (showSmartToast)
+            showSmartToast("الرجاء إدخال عدد صحيح وموجب للأسئلة.", "warning");
+          return;
+        }
+        if (numberOfQuestions > questionsData.length) {
+          // console.error(
+          //   `لا يمكن اختيار ${numberOfQuestions} سؤال، العدد الأقصى المتاح هو ${questionsData.length} سؤال.`
+          // );
+          if (showSmartToast)
+            showSmartToast(
+              `العدد الأقصى للأسئلة المتاحة هو ${questionsData.length}`,
+              "warning"
+            );
+          return;
+        }
+
+        // console.log(
+        //   `جاري بدء اختبار عشوائي مكون من ${numberOfQuestions} سؤال...`
+        // );
+
+        // --- 2. اختيار الأسئلة العشوائية ---
+        const shuffledAllQuestions = shuffleArray([...questionsData]);
+        selectedQuestions = shuffledAllQuestions.slice(0, numberOfQuestions);
+
+        if (shuffleChoices) {
+          selectedQuestions.forEach(q => {
+            if (q.choices) {
+              q.choices = shuffleArray([...q.choices]);
+            }
+          });
+          // console.log("تم تفعيل خلط الخيارات عشوائياً.");
+        }
+
+        // --- 3. تهيئة متغيرات وبيئة الاختبار ---
+        userAnswers = new Array(selectedQuestions.length).fill(null);
+        currentQuestionIndex = 0;
+        score = 0;
+        selectedCategories = new Set(["اختبار عشوائي"]);
+        selectedExams = new Set([`اختبار ${numberOfQuestions} سؤال/أسئلة`]);
+        createdAt = new Date().toISOString();
+
+        // --- 4. إعداد واجهة المستخدم ---
+        document.getElementById("setupScreen").style.display = "none";
+        document.getElementById("resultsScreen").style.display = "none";
+        document.getElementById("quizScreen").style.display = "block";
+        document.getElementById("totalQuestionsNum").textContent =
+          selectedQuestions.length;
+
+        if (timerInterval) {
+          clearInterval(timerInterval);
+          document.getElementById("timer").style.display = "none";
+        }
+
+        // --- 5. حفظ حالة الاختبار للرجوع إليها لاحقًا ---
+        const uniqueCode = generateUniqueCode();
+        window.currentExamCode = uniqueCode;
+
+        const questionIndices = selectedQuestions.map(q =>
+          questionsData.findIndex(
+            item =>
+              item.category === q.category &&
+              item.exam === q.exam &&
+              item.question_number === q.question_number
+          )
+        );
+
+        const examState = {
+          selectedQuestions: questionIndices,
+          currentQuestionIndex: 0,
+          userAnswers: userAnswers,
+          score: 0,
+          selectedCategories: Array.from(selectedCategories),
+          selectedExams: Array.from(selectedExams),
+          isDone: false,
+          questionsCount: selectedQuestions.length,
+          createdAt: createdAt,
+        };
+
+        await idbSet("exams", uniqueCode, examState);
+
+        const previousCodes = JSON.parse(
+          localStorage.getItem("previousExams25") || "[]"
+        );
+        previousCodes.push(uniqueCode);
+        localStorage.setItem("previousExams25", JSON.stringify(previousCodes));
+
+        if ((await checkOnline()) && currentUserId) {
+          syncNewExamToCloud(examState, uniqueCode);
+        }
+
+        // --- 6. بدء الاختبار بعرض السؤال الأول ---
+        await showQuestion();
+
+        // console.log(`تم بدء الاختبار بنجاح. رمز الاختبار: ${uniqueCode}`);
+        // if (showSmartToast)
+        //   showSmartToast(
+        //     `تم بدء اختبار عشوائي بـ ${numberOfQuestions} سؤال.`,
+        //     "success"
+        //   );
+      }
+    </script>
+  </body>
+</html>
