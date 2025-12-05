@@ -1,0 +1,5 @@
+{
+  "default_enabled": false,
+  "placeholder_account": "account@example.com",
+  "notes": "Toggle synchronization to prepare linking with backend service."
+}

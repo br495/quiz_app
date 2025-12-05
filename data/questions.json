@@ -1,0 +1,21 @@
+[
+  {
+    "path": "https://placehold.co/600x400?text=Math+01",
+    "group": "رياضيات",
+    "sub_group": "جبر",
+    "correct": "A",
+    "choices": ["x=5", "x=6", "x=7", "x=8"]
+  },
+  {
+    "path": "https://placehold.co/600x400?text=Math+02",
+    "group": "رياضيات",
+    "sub_group": "تفاضل",
+    "correct": "B"
+  },
+  {
+    "path": "https://placehold.co/600x400?text=Physics+01",
+    "group": "فيزياء",
+    "correct": "C",
+    "choices": ["10N", "12N", "14N", "16N"]
+  }
+]
